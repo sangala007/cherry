@@ -1,0 +1,22 @@
+<h1>PEOPLE</h1>
+
+<ul>
+{{#each people}}
+	<li>
+		{{id}}, username:{{username}}, password:{{password}}
+
+		{{#each this.addresses}}
+			<ul>
+				<li>id:{{id}}</li>
+				<li>person_id:{{person_id}}</li> 
+				<li>address_1:{{address_1}}</li> 
+				<li>city:{{city}}</li> 
+				<li>state:{{state}}</li> 
+				<li>zip:{{zip}}</li> 
+				<li>country:{{country}}</li>
+			</ul>
+        {{/each}}
+
+	</li>
+{{/each}}
+</ul>

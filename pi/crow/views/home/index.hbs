@@ -1,0 +1,34 @@
+<h1>Crow Welcomes You!</h1>
+
+{{#if connected}}
+	{{#if suid}}
+		<form class="form-horizontal" action="/devices" method="GET">
+		  <div class="form-group">
+		    <div class="col-sm-7">
+				<button class="btn btn-success" type="submit">Edit Existing System</button>
+		    </div>
+		  </div>
+		</form>
+		<div>-- Or --</div>
+	{{/if}}
+
+	<form class="form-horizontal" action="/account/create" method="GET">
+	  <div class="form-group">
+	    <div class="col-sm-7">
+			<button class="btn btn-success" type="submit">Set up New System</button>
+	    </div>
+	  </div>
+	</form>
+
+{{else}}
+	<form class="form-horizontal" action="/internet" method="POST">
+	  <div class="form-group">
+	    <div class="col-sm-7">
+			<button class="btn btn-success" type="submit">Set up Your Internet Connection</button>
+	    </div>
+	  </div>		
+	</form>
+{{/if}}
+
+
+

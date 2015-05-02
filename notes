@@ -1,0 +1,301 @@
+ARCHITECTURE
+
+Pi:
+* CROW
+	TCP: 3000
+	Web server  
+
+* STARLING
+	PUB: 9000
+	Gather data from sensors data and publish them to subscriber WOLF.
+
+* WOLF		
+	SUB: 9000,	REQ: 9001
+	Subscribe to messages published by STARLING. Once message is received
+	issue a request to remote daemon DOG and await for its response.
+
+Cloud:
+* RAVEN
+	TCP: 3001
+	Web server
+
+* DOG
+	REP: 9001
+	Receive messages from WOLF and reply to them with response.
+
+
+FIRST TIME SETUP:
+- Connect to PersonalSecurity access point.
+- Visit https://ps.setup from browser.
+- Pages are served by Raspberry's web server (Crow)
+
+
+Page 1:	Welcome 
+
+	SET YOUR SYSTEM button
+
+Page 1.1: 
+
+    Pick Wifi or Ethernet
+
+    Wifi: 
+    	Connect to Wifi Access Point
+    	1. Pick SSID
+    	2. Enter password
+    	3. Go To Page 2
+
+    Ethernet: Goto Page 2.
+
+All of the later pages are proxied from (Raven)
+
+------------------------------
+Page 2:	Create Account
+
+	Customer Name: John Doe
+	Email:
+	Password:
+	Confirm Password:
+	Security Password/Pin:
+	Phone:
+
+	Next button
+
+Save to local storage.
+
+------------------------------
+Page 3: Create System
+
+	Name:
+	Timezone:
+
+	Save button
+
+Submit to remote API where:
+- new user will be created
+- new system will be created
+- unique system token will be generated with encrypted system_id
+- save system_id to rasberry.
+
+Confirmation Screen Shown:
+
+- System was created with John Doe as the owner.
+
+	Next Button
+
+
+------------------------------
+Page 4:	System Devices
+
+	List shows Known device, and Close By devices (RSSI)
+
+	Name		Device Type		Use as Trigger		Trigger Value		Current Value
+
+	__________  ____________^   _____________^      _______________     ..........
+	Front Door	Motion Sensor	Yes					On					Off 
+	Back Door	Actuator		Yes					Open				Closed
+	Outside		Thermometer		No										67
+	Inside		Thermometer		Yes					85					73
+	Camera 1	Camera			No											
+
+	Save button
+
+- Device Type and Used as Trigger fields are dropdowns
+- as user tinkers with each device it should automatically update with appropriate values (WebSocket)
+
+Submit to remote service where:
+- each device will be created for the system (send duid serial number)
+- from the remote response update each device in local storage with appropriate remote device id
+
+------------------------------
+Page 5:	System Test
+
+	State: ___________
+
+	Submit button
+
+	- Verify you received a text message & email about your system.
+	- Setup other notifications later....
+
+Save to local storage and remote service.
+
+- State field is a dropdown with Arm, Disarm vlaues.
+
+
+EDIT SYSTEM:
+- on the local network user types https://127.0..
+- pages are served by Raspberry's web server
+- this is when system token exists in local storage
+
+Page 1:	Login 
+
+	Email
+	password
+
+	Submit button 
+	Forgot password link
+
+	SET UP NEW SYSTEM button
+
+- when login authenticate against remote service
+- SET UP NEW -> Create Account page
+
+
+------------------------------
+Page 2:	Your System 
+
+	System State		
+
+	Submit button
+
+Save to local storage and remote service.
+
+	System Devices
+	Name		Device Type		Used as Trigger		Trigger Value		Current Value
+
+	Submit button
+
+Submit to remote service where:
+- each device will be updated or created
+- from the remote response update each device in local storage with appropriate remote device id
+
+
+
+/*
+* Socket API requests from WOLF to DOG
+*/ 
+
+Client request:
+{
+	action : 'createSystem'
+	data   : {
+		user: {
+			username : 'username',
+			email    : 'joe@adf.com',
+			password : 'pass',
+		},
+		system: {
+			name: 'Home'
+		},
+		devices : {
+			{name: 'Front Door', duid: 'a2we34', type_id: 1},
+			{name: 'Back Door',	duid: '3dkx34', type_id: 1},
+			{name: 'Basement',	duid: '8765ju', type_id: 2},
+		}
+	}
+}
+
+Server: 
+1. Create new user record if applicable.
+2. Generate new unique system identifier.
+3. Create new system record.
+4. Create new device records.
+
+Response: {
+	status  : 200,
+	message : 'OK',
+	data    : {
+		system : {
+			id    : 1,
+			suid  : 'ad23adx34w',
+			armed : 0
+		},
+		devices : { 
+			{duid: 'a2we34', id: 1},
+			{duid: '3dkx34', id: 2},
+			{duid: '8765ju', id: 3},
+		}
+	}
+}
+
+// INSERT METRIC
+
+Client request:
+{
+	action : 'createMetric'
+	data   : {
+		suid             : 'ad23adx34w',
+		system_device_id : 2,
+		value            : 10
+	}
+}
+
+Server: 
+SELECT * FROM system_devices WHERE id = system_device_id AND suid = suid;
+
+if system_device
+	// Trigger alarm when:
+	if active and trigger and value >= trigger
+		Alarm!!!
+	end
+
+	INSERT into metrics VALUES (0, system_id, system_device_id, value, UNIX_TIMESTAMP());
+end
+
+Response: {
+	status  : 200,
+	message : 'OK'
+}
+
+// Arm/Disarm system
+{
+	url  : 'arm'
+	type : 'PUT'
+	data : {
+		suid      : 'ad23adx34w',
+		system_id : 1,
+		value     : 1
+	}
+}
+Response: {
+	status  : 200,
+	message : 'OK'
+}
+UPDATE systems SET armed = value WHERE id = system_id AND suid = suid;
+
+- Communicate to system about system change.
+
+//////////////////////////
+
+PUB/SUB
+
+// Random number from 1 to 10.
+var number = Math.abs(Math.round(Math.random() * 10));
+
+// Subscribe only to a particular messages.
+subscriber.subscribe(String(number));
+
+subscriber.on('message', function(data) {
+	var msg = [];
+	Array.prototype.slice.call(arguments).forEach(function(arg) {
+		msg.push(arg.toString());
+	});
+	console.log(msg);
+
+// Executes over and over again, at 1s time intervals.
+setInterval(function(){ sendRequest() }, 1000);
+
+function sendRequest() {
+	var message = JSON.stringify({
+			action    : 'createMetric',
+			suid      : 'NWJjODVhYThkZTM1OWNlYzM1NWU3Y2YwMTRiMzlk',
+			device_id : 1,
+			value     : 3
+		});
+
+	console.log('REQ: %s', message);
+
+	requester.send(message);
+};
+
+// PUB
+console.log('PUB:%d, %s', number, message);
+
+publisher.send([number, message]);
+
+insert into system_devices (system_id, device_type_id, duid, name, should_trigger,trigger_value) values(1,1,'asdfadsf','Front Door', 1, 1);
+
+
+
+
+
+

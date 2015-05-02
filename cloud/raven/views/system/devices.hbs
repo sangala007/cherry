@@ -1,0 +1,56 @@
+
+<h2>System Devices</h2>
+<div class="bs-example" data-example-id="simple-table">
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>#</th>
+      <th>Name</th>
+      <th>Device Type</th>
+      <th>Use as Trigger</th>
+      <th>Trigger Value</th>
+      <th>Current Value</th>
+    </tr>
+  </thead>
+  <tbody>
+{{#each system.devices}}
+    <tr>
+      <th scope="row">{{inc @index}}</th>
+      <td>{{name}}</td>
+      <td>
+        <select name="device_type_id_{{id}}" class="form-control" id="device_type_id_{{id}}">
+        {{#each ../deviceTypes}}
+          <option value="{{id}}" {{#ifCond ../this.device_type_id '===' id}}selected{{/ifCond}}>{{name}}</option>
+        {{/each}}
+        </select>
+      </td>
+      <td>
+        <select name="should_trigger" class="form-control" id="should_trigger">
+          <option value="1" {{#if should_trigger}}selected{{/if}}>Yes</option>
+          <option value="0" {{#if should_trigger}}{{else}}selected{{/if}}>No</option>
+        </select>
+      </td>
+      <td>{{trigger_value}}</td>
+      <td id="device_1"></td>
+    </tr>
+{{/each}}
+  </tbody>
+</table>
+</div>
+
+<script>
+ var socket = io.connect();
+
+ // Message received.
+ socket.on('message', function(data) {
+  socket.emit('rodgerThat', { data: 'received it.' });
+
+  var devices = data.devices || [];
+  for(var i = 0; i < devices.length; i++) {
+    var device = devices[i];
+    $('#device_'+device.id).html((device.value).toFixed(6));
+  }
+});
+</script>
+
+

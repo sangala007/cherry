@@ -1,0 +1,24 @@
+<h1>Connection Setup</h1>
+
+{{#if connected}}
+	<h3>You are CONNECTED to internet!</h3>
+
+	<form class="form-horizontal" action="/account/create" method="GET">
+		<div class="form-group">
+			<div class="col-sm-7">
+				<button class="btn btn-success" type="submit">Next</button>
+			</div>
+		</div>
+	</form>
+
+{{else}}
+	<h3>Sorry, You are NOT CONNECTED!</h3>
+
+	<form class="form-horizontal" action="/internet" method="POST">
+		<div class="form-group">
+			<div class="col-sm-7">
+				<button class="btn btn-success" type="submit">Try Again</button>
+			</div>
+		</div>	
+	</form>
+{{/if}}

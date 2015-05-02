@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>RAVEN</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{_csrf}}" />
+    <script src="//code.jquery.com/jquery-2.0.2.min.js"></script>
+
+<script src="/socket.io/socket.io.js"></script>
+
+    <!-- Bootstrap core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="/css/style.css" rel="stylesheet" />
+  </head>
+  
+  <body>
+    <div class="container">
+      <div class="row">
+      	{{> header}}
+      </div>
+
+      <div class="row">
+      	{{> flash}}
+
+      	{{#if user}}
+      		<div style="text-align: center;">Hello, {{user.email}}</div>
+      	{{/if}}
+
+      	{{{body}}}
+      </div>
+
+      <div class="row">
+      	{{> footer}}
+      </div>
+    </div>
+  </body>
+</html>
