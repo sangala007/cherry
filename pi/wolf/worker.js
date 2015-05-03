@@ -5,7 +5,8 @@
 /*
 * WOLF
 * Subscribe to messages published by STARLING. Once message is received
-* issue a request to remote daemon DOG and await for its response.
+* add an identity of this client to it and issue a request to remote 
+* daemon DOG and await for its response.
 */
 
 const
@@ -24,21 +25,22 @@ subscriber.subscribe('');
 
 // Update DOG with published message from STARLING.
 subscriber.on('message', function(data) {
-	var message = JSON.stringify( JSON.parse(data) );
+	var message = JSON.stringify(JSON.parse(data));
+
 	console.log('REQ: %s', message);
+
 	requester.send(message);
 });
 
 // Connect to publisher STARLING.
 subscriber.connect(config.subTarget);
 
-
 /*
 * REQ/REP
 */
 
 // Supply identity of this client.
-requester.identity = "WOLF";
+requester.identity = 'NWJjODVhYThkZTM1OWNlYzM1NWU3Y2YwMTRiMjlh';
 
 // Handle replies from DOG.
 requester.on('message', function(data) {
