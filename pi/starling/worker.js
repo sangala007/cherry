@@ -4,7 +4,7 @@
 
 /*
 * STARLING 
-* Gathers data from each sensor and publishes them to subscriber WOLF.
+* Gather data from each sensor and publish them to subscriber WOLF.
 */
 
 const
@@ -13,17 +13,19 @@ const
 	zmq       = require('zmq'),
 	publisher = zmq.socket('pub');
 
-	// Create device metric.
-	let	message = JSON.stringify({
-			action    : 'createMetric',
-			suid      : 'NWJjODVhYThkZTM1OWNlYzM1NWU3Y2YwMTRiMzlk',
-			device_id : 1,
-			value     : 3
-		});
-
 	setInterval(function() {
+		// Create device metric.
+		let
+			message = JSON.stringify({
+				action    : 'createMetric',
+				suid      : 'NWJjODVhYThkZTM1OWNlYzM1NWU3Y2YwMTRiMjlh',
+				device_id : (Math.floor(Math.random() * 4)+1),
+				value     : Math.random()
+			});
+
 		console.log('PUB: %s', message);
 
+		// Publish message with suid identity.
 		publisher.send(message);
 	}, 1000);
 
