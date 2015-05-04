@@ -31,7 +31,7 @@ if (cluster.isMaster) {
 	// Forward messages between router and dealer.
 	router.on('message', function() {
 		let frames = Array.prototype.slice.call(arguments);
-		console.log(Util.dumpFrames(frames));
+		// console.log(Util.dumpFrames(frames));
 		dealer.send(frames);
 	});
 

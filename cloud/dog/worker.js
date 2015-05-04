@@ -4,7 +4,8 @@
 
 /*
 * DOG
-* Worker RESPONDER responds to requests.
+* Receive messages from WOLF and reply to it with response.
+* Also, publish received messages for subscriber RAVEN.
 */
 
 const
@@ -17,7 +18,10 @@ const
 function start() {
 	let
 		// Create and bind to interprocess RESPONSE socket.
-		responder  = zmq.socket('rep').connect('ipc://filer-dealer.ipc'),
+		responder = zmq.socket('rep').connect('ipc://filer-dealer.ipc'),
+
+		// Bind to publish incoming messages to subscriber RAVEN.
+		publisher = zmq.socket('pub').bind(config.pubTarget),
 
 		// MySQL connection.
 		dbh = mysql.createConnection(config.mysql);
@@ -26,12 +30,16 @@ function start() {
 
 	// Handle incoming request from WOLF.
 	responder.on('message', function(req) {
-		let 			
+		let
 			data      = JSON.parse(req), // Parse incoming request.
 			system_id = Util.idFromToken(data.suid), // Get system_id from token.
 			respCode  = 200;
 
-		// console.log('%d REQ: %s', process.pid, JSON.stringify(data));
+		// Publish incoming message to subscriber RAVEN
+		// with added system_id as message identity.
+		publisher.send([system_id, JSON.stringify(data)]);
+
+		console.log('%d REQ: %s', process.pid, JSON.stringify(data));
 
 		switch (data.action) {
 			case 'createMetric':
@@ -81,7 +89,7 @@ function start() {
 		dbh.end();
 	});
 
-	console.log("✔ REQ/RES: %s", config.target);
+	console.log("✔ REQ/RES: %s, PUB: %s", config.target, config.pubTarget);
 };
 
 /*

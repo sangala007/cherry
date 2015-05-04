@@ -1,6 +1,7 @@
 
 module.exports = {
-	target : 'tcp://127.0.0.1:9001',
+	target    : 'tcp://127.0.0.1:9001',
+	pubTarget : 'tcp://*:9002',
 	mysql  : {
 		host     : 'localhost',
 		user     : 'node', 
@@ -10,3 +11,4 @@ module.exports = {
 		charset  : 'utf8'
 	}
 };
+

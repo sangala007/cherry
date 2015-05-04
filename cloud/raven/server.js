@@ -2,6 +2,7 @@
 
 const
 	config           = require('./config'),
+	Util             = require('../lib/util'),
 	express          = require('express'),
 	http             = require('http'),
 	socket           = require('socket.io'),
@@ -21,7 +22,10 @@ const
     passport         = require('passport'),
 	_                = require('lodash'),
 	hbsHelpers       = require('./lib/helpers'),
-	MongoStore       = require('connect-mongo')(session);
+	MongoStore       = require('connect-mongo')(session),
+
+	zmq              = require('zmq'),
+	subscriber       = zmq.socket('sub');
 
 // App.
 var app = express();
@@ -31,6 +35,9 @@ var server = http.Server(app);
 
 // Socket
 var io = socket(server);
+
+// Connect to publisher DOG.
+subscriber.connect(config.subTarget);
 
 // Handlebars settings
 app.engine('hbs', hbs.__express);
@@ -173,18 +180,39 @@ server.listen(config.port, function() {
 
 /*
 * Socket from web client.
+* Upon establishing web client connection and receiving 
+* data with client's suid, subscribe to DOG for published messages
+* for that client.
 */
 io.on('connection', function (socket) {
-	console.log('Client connected.');
-
-	setInterval(function(){ 
-		// To client.
-		socket.emit('message', fakeDevicesData());
-	}, 2000);
+	console.log('CLIENT connected.');
 
 	// From client.
-	socket.on('rodgerThat', function (data) {
-		// console.log('From client:', data);
+	socket.on('hello', function (data) {
+		data = data || {};
+		let system_id = Util.idFromToken(data.suid);
+
+		// Subscribe to messages for this client published by DOG.
+		if (system_id) {	
+			console.log('CLIENT SUB to DOG: %s', system_id);
+
+			subscriber.subscribe(system_id+''); 
+		}
+	});
+
+	// PUB/SUB: Update client's devices when message from DOG is received.
+	subscriber.on('message', function() {
+		var msg = [];
+		Array.prototype.slice.call(arguments).forEach(function(arg) {
+			msg.push(arg.toString());
+		});
+
+		let 
+			system_id = msg[0],
+			data      = msg[1];
+
+		console.log('%d, %s', system_id, data);
+		// socket.emit('message', fakeDevicesData());
 	});
 });
 
@@ -196,4 +224,5 @@ function fakeDevicesData() {
 			{ id: 3, value: Math.random()}
 		]
 	}
-}
+}	
+

@@ -18,14 +18,14 @@
       <th scope="row">{{inc @index}}</th>
       <td>{{name}}</td>
       <td>
-        <select name="device_type_id_{{id}}" class="form-control" id="device_type_id_{{id}}">
+        <select class="form-control device-type" id="device-type-id_{{id}}">
         {{#each ../deviceTypes}}
           <option value="{{id}}" {{#ifCond ../this.device_type_id '===' id}}selected{{/ifCond}}>{{name}}</option>
         {{/each}}
         </select>
       </td>
       <td>
-        <select name="should_trigger" class="form-control" id="should_trigger">
+        <select class="form-control should-trigger" id="should-trigger_{{id}}">
           <option value="1" {{#if should_trigger}}selected{{/if}}>Yes</option>
           <option value="0" {{#if should_trigger}}{{else}}selected{{/if}}>No</option>
         </select>
@@ -39,17 +39,35 @@
 </div>
 
 <script>
- var socket = io.connect();
+  var socket = io.connect();
+  // Announce itself to server.
+  socket.emit('hello', { suid: '{{suid}}' });
 
- // Message received.
- socket.on('message', function(data) {
-  socket.emit('rodgerThat', { data: 'received it.' });
+  // Message received.
+  socket.on('message', function(data) {
+    var devices = data.devices || [];
+    for(var i = 0; i < devices.length; i++) {
+      var device = devices[i];
+      $('#device_'+device.id).html((device.value).toFixed(6));
+    }
+});
 
-  var devices = data.devices || [];
-  for(var i = 0; i < devices.length; i++) {
-    var device = devices[i];
-    $('#device_'+device.id).html((device.value).toFixed(6));
-  }
+// Update +device_type+ changed.
+$('.device-type').on('change', function(event){
+  socket.emit('rodgerThat', { data: {
+      action : 'editDeviceType',
+      id     : event.target.id.split('_')[1],
+      value  : event.target.value
+  }});
+});
+
+// Update +should_trigger+ when changed.
+$('.should-trigger').on('change', function(event){
+  socket.emit('rodgerThat', { data: {
+      action : 'editShouldTrigger',
+      id     : event.target.id.split('_')[1],
+      value  : event.target.value
+  }});
 });
 </script>
 

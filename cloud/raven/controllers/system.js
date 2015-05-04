@@ -107,13 +107,14 @@ module.exports = {
 			id: system_id
 
 		}).fetch({
-			require: true,
-			debug: true,
-			withRelated: ['devices']
+			require     : true,
+			debug       : true,
+			withRelated : ['devices']
 
 		}).then(function(system) {
-console.log(deviceTypes.toJSON());
+// console.log(deviceTypes.toJSON());
 			res.render('system/devices', {
+				suid        : req.params.suid,
 				system      : system.toJSON(),
 				deviceTypes : deviceTypes.toJSON()
 			});

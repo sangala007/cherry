@@ -15,6 +15,7 @@ var config = {
 				charset  : 'utf8'
 			}
 		},
+		subTarget    : 'tcp://localhost:9002',
 		cookieSecret : '123456ASDFGH',
 		mongodbUrl   : 'http://localhost:27017'
 	},
@@ -33,6 +34,7 @@ var config = {
 				charset  : 'utf8'
 			}
 		},
+		subTarget    : 'tcp://localhost:9002',
 		cookieSecret : '123456ASDFGH',
 		mongodbUrl   : 'http://localhost:27017'
 	}
