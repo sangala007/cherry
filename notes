@@ -7,22 +7,23 @@ Pi:
 
 * STARLING
 	PUB: 9000
-	Gather data from sensors data and publish them to subscriber WOLF.
+	Gather data from sensors and publish them to subscriber WOLF.
 
 * WOLF		
 	SUB: 9000,	REQ: 9001
-	Subscribe to messages published by STARLING. Once message is received
+	Subscribe to messages published by STARLING. When received,
 	issue a request to remote daemon DOG and await for its response.
 
 Cloud:
 * RAVEN
-	TCP: 3001
+	TCP: 3001,	SUB: 9002
 	Web server
+	Subscribe to messages from particular system only published by DOG
 
 * DOG
-	REP: 9001
+	REP: 9001,	PUB: 9002
 	Receive messages from WOLF and reply to them with response.
-
+	Publish received messages filtered by particular system 
 
 FIRST TIME SETUP:
 - Connect to PersonalSecurity access point.
@@ -294,8 +295,50 @@ publisher.send([number, message]);
 
 insert into system_devices (system_id, device_type_id, duid, name, should_trigger,trigger_value) values(1,1,'asdfadsf','Front Door', 1, 1);
 
+// console.log('RAW Response from the target', JSON.stringify(proxyRes.headers, true, 2));
+// console.log('RAW Response from the target', proxyRes.statusCode);
+// console.log('RAW Response from the target:', proxyRes.headers);
 
+// setInterval(function(){ 
+// 	// To client.
+// 	socket.emit('message', fakeDevicesData());
+// }, 2000);
 
+function fakeDevicesData() {
+	return {
+		devices : [
+			{ id: 1, value: Math.random()},
+			{ id: 2, value: Math.random()},
+			{ id: 3, value: Math.random()}
+		]
+	}
+}	
 
+// String to binary
+function toBin(str){
+ var st,i,j,d;
+ var arr = [];
+ var len = str.length;
+ for (i = 1; i<=len; i++){
+  //reverse so its like a stack
+  d = str.charCodeAt(len-i);
+  for (j = 0; j < 8; j++) {
+   arr.push(d%2);
+   d = Math.floor(d/2);
+  }
+ }
 
+ //reverse all bits again.
+ return arr.reverse().join("");
+}
+
+// Number to binary
+(dec >>> 0).toString(2);
+
+// Char to binary
+var suid = 'NWJjODVhYThkZTM1OWNlYzM1NWU3Y2YwMTRiMjlh'
+var bin = '';
+for (i=0; i < suid.length; i++) {
+    bin += suid[i].charCodeAt(0).toString(2);
+}
 
