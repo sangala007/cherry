@@ -2,7 +2,7 @@
 
 {{#if connected}}
 	{{#if suid}}
-		<form class="form-horizontal" action="/devices" method="GET">
+		<form class="form-horizontal" action="/system/{{suid}}/devices" method="GET">
 		  <div class="form-group">
 		    <div class="col-sm-7">
 				<button class="btn btn-success" type="submit">Edit Existing System</button>
